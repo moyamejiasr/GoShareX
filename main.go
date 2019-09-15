@@ -1,10 +1,9 @@
 package main
 
 import (
-	"crypto/rand"
+	"crypto/md5"
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -20,14 +19,6 @@ var (
 	vPath  = flag.String("path", "/!/", "Virtual public path for preview")
 	size   = flag.Int64("size", 10, "Max upload size in MB")
 )
-
-/*Generate a valid filename for output*/
-func genFilename(fname string) string {
-	var UID = make([]byte, 16)
-	io.ReadFull(rand.Reader, UID)
-
-	return fmt.Sprintf("%X%s", UID, path.Ext(fname))
-}
 
 /*UploadFile uploads file to output if secret valid*/
 func UploadFile(w http.ResponseWriter, r *http.Request) {
@@ -51,8 +42,11 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get filename from MD5 sum - that way
+	// we get rid of duplicates.
+	fName := fmt.Sprintf("%x%s", md5.Sum(data),
+		path.Ext(handler.Filename))
 	// Write to file
-	fName := genFilename(handler.Filename)
 	err = ioutil.WriteFile(path.Join(*output, fName),
 		data, os.ModePerm)
 	if err != nil {
