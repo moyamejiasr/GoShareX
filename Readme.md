@@ -1,6 +1,11 @@
 # GOSHAREX
 A simple Custom ShareX Uploader using only standard built-in Go packages.
 
+### Version 2
+- Filenames are generated from unixnano base64 encoded
+### Version 1
+- Filenames are generated from file MD5 Sum
+
 # Installation
 ````
 go get github.com/Onelio/GoShareX

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/md5"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +9,8 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
+	"unsafe"
 )
 
 var (
@@ -19,6 +21,14 @@ var (
 	vPath  = flag.String("path", "/!/", "Virtual public path for preview")
 	size   = flag.Int64("size", 10, "Max upload size in MB")
 )
+
+/*GenerateName return a filename base64 encoded from time*/
+func GenerateName(str string) string {
+	n := time.Now().UnixNano()
+	name := (*[8]byte)(unsafe.Pointer(&n))
+	return base64.RawURLEncoding.EncodeToString(name[:]) +
+		path.Ext(str)
+}
 
 /*UploadFile uploads file to output if secret valid*/
 func UploadFile(w http.ResponseWriter, r *http.Request) {
@@ -42,11 +52,8 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get filename from MD5 sum - that way
-	// we get rid of duplicates.
-	fName := fmt.Sprintf("%x%s", md5.Sum(data),
-		path.Ext(handler.Filename))
-	// Write to file
+	// Get short filename and write to file
+	fName := GenerateName(handler.Filename)
 	err = ioutil.WriteFile(path.Join(*output, fName),
 		data, os.ModePerm)
 	if err != nil {
