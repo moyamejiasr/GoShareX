@@ -32,9 +32,9 @@ func GenerateName(str string) string {
 
 /*UploadFile uploads file to output if secret valid*/
 func UploadFile(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(*size << 20)
+	err := r.ParseMultipartForm(*size << 20)
 	// Check secret key - hide if not match
-	if *secret != r.FormValue("secret") {
+	if err != nil || *secret != r.FormValue("secret") {
 		http.NotFound(w, r)
 		return
 	}
@@ -88,9 +88,8 @@ func main() {
 	// Check output exists
 	os.MkdirAll(*output, os.ModePerm)
 
-	// Static Handlers
+	// Static Handler
 	http.HandleFunc("/upload", UploadFile)
-
 	// FServer Handler
 	fServer := ListDirectory(http.FileServer(http.Dir(*output)))
 	http.Handle(*vPath, http.StripPrefix(*vPath, fServer))

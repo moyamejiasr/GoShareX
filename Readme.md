@@ -1,5 +1,7 @@
 # GOSHAREX
-A simple Custom ShareX Uploader using only standard built-in Go packages.
+A simple Custom ShareX Uploader using only standard built-in Go packages. 
+
+PD: Although this tool can be compiled for Windows and Linux the client software(ShareX) is only available for Windows.
 
 ### Version 2
 - Filenames are generated from unixnano base64 encoded
