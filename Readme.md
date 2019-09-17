@@ -34,7 +34,7 @@ GoShareX.exe
 - `path` Set virtual path for previewing files (Default "/!/")
 - `secret` Shared secret between ShareX and server for auth - allow everything if none (Default "")
 - `iplist` Coma separated list of every dir-listing allowed address (Default "127.0.0.1")
-- `size` Max Upload size in MB (Default 10)
+- `size` Max upload size in MB stored in memory - rest is saved to disk (Default 10)
 
 # ShareX Configuration
 Setting ShareX custom uploader can be done with a `.sxcu` file like __config_example.sxcu__. You just need to change the domain and secret to fit yours.

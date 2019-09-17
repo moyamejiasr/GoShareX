@@ -19,7 +19,7 @@ var (
 	secret = flag.String("secret", "", "Secret key for allowing uploads (allow all if none)")
 	iplist = flag.String("iplist", "127.0.0.1", "Ip list to allow displaying file-list")
 	vPath  = flag.String("path", "/!/", "Virtual public path for preview")
-	size   = flag.Int64("size", 10, "Max upload size in MB")
+	size   = flag.Int64("size", 10, "Max upload size in MB stored in memory(rest is saved to disk)")
 )
 
 /*GenerateName return a filename base64 encoded from time*/
