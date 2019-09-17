@@ -1,12 +1,23 @@
 # GOSHAREX
 A simple Custom ShareX Uploader using only standard built-in Go packages. 
 
-PD: Although this tool can be compiled for Windows and Linux the client software(ShareX) is only available for Windows.
+**PD: Although this tool can be compiled for Windows and Linux the client software(ShareX) is only available for Windows.**
 
+### Version 3
+[Get it here](https://github.com/Onelio/GoShareX/tree/V3)
+- Support has been improved for streaming and big files transfer
 ### Version 2
+[Get it here](https://github.com/Onelio/GoShareX/tree/V2.1)
 - Filenames are generated from unixnano base64 encoded
 ### Version 1
+[Get it here](https://github.com/Onelio/GoShareX/tree/V1)
 - Filenames are generated from file MD5 Sum
+
+# INDEX
+1. [Installation](#Installation)
+2. [Launch Options](#Options)
+3. [ShareX Configuration](#ShareX-Configuration)
+4. [FAQ](#FAQ)
 
 # Installation
 ````
