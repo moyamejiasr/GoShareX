@@ -31,6 +31,7 @@ Setting ShareX custom uploader can be done with a `.sxcu` file like __config_exa
 ````
 {
    "Version":"13.0.1",
+   "DestinationType": "ImageUploader, TextUploader, FileUploader",
    "RequestMethod":"POST",
    "RequestURL":"http:{YOUR_DOMAIN}/upload",
    "Body":"MultipartFormData",
@@ -42,3 +43,21 @@ Setting ShareX custom uploader can be done with a `.sxcu` file like __config_exa
 ````
 
 Remember that uploads will allways be made to __/upload__ with a POST method and a valid secret and file. Anything else will return 404.
+
+# FAQ
+
+**Q:** *Can't upload anything with secret ""*
+
+**R:** Remove secret from the CustomUploader settings as argument.
+
+**Q:** *Upload fails with "http: no such file"*
+
+**R:** Check that your "FileFormName" value is "file" and that you are uploading images, files or text only.
+
+**Q:** *Upload returns 404 with valid secret*
+
+**R:** Check that your file does not exceeds the max allowed (10MB by default).
+
+**Q:** *Can't preview the dir-listing on localhost*
+
+**R:** Localhost works different from remote. This is a known bug.

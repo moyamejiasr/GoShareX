@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -39,28 +39,28 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get and read file from form data
-	file, handler, err := r.FormFile("file")
+	// Get file buffer from Form data
+	buffer, handler, err := r.FormFile("file")
+	if err != nil {
+		fmt.Fprintln(w, err)
+		return
+	}
+	defer buffer.Close()
+	// Create local file
+	fName := GenerateName(handler.Filename)
+	file, err := os.Create(path.Join(*output, fName))
 	if err != nil {
 		fmt.Fprintln(w, err)
 		return
 	}
 	defer file.Close()
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Fprintln(w, err)
-		return
-	}
 
-	// Get short filename and write to file
-	fName := GenerateName(handler.Filename)
-	err = ioutil.WriteFile(path.Join(*output, fName),
-		data, os.ModePerm)
+	// Write file, print result and return
+	_, err = io.Copy(file, buffer)
 	if err != nil {
 		fmt.Fprintln(w, err)
 		return
 	}
-	// Display result
 	fmt.Fprintf(w, "http://%s%s", r.Host,
 		path.Join(*vPath, fName))
 }
@@ -96,8 +96,9 @@ func main() {
 
 	fmt.Print("Listening on ", *domain, " address...")
 	err := http.ListenAndServe(*domain, nil)
-	if err != nil {
-		panic(err)
-	}
 	fmt.Println()
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }
