@@ -36,17 +36,14 @@ func GenerateName(str string) string {
 /*UploadFile uploads file to output if secret valid*/
 func UploadFile(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(*size << 20)
-	// Log request
-	if *connLog {
-		log.Printf("UPLOAD[%s]>> ", r.RemoteAddr)
-	}
 
 	// Check secret key - hide if not match
 	value := r.FormValue("secret")
 	if err != nil || *secret != value {
 		http.NotFound(w, r)
-		if *connLog {
-			fmt.Printf("SECRET_FAIL:%s RET\n", value)
+		if *connLog { // Log request
+			log.Printf("UPLOAD[%s]>> SECRET_FAIL:%s RET\n",
+				r.RemoteAddr, value)
 		}
 		return
 	}
@@ -55,8 +52,9 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	buffer, handler, err := r.FormFile("file")
 	if err != nil {
 		_, _ = fmt.Fprintln(w, err)
-		if *connLog {
-			fmt.Print("BUFFER_FAIL RET\n")
+		if *connLog { // Log request
+			log.Printf("UPLOAD[%s]>> BUFFER_FAIL RET\n",
+				r.RemoteAddr)
 		}
 		return
 	}
@@ -66,8 +64,9 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	file, err := os.Create(path.Join(*output, fName))
 	if err != nil {
 		_, _ = fmt.Fprintln(w, err)
-		if *connLog {
-			fmt.Printf("OSMAKE_FAIL:%s RET\n", fName)
+		if *connLog { // Log request
+			log.Printf("UPLOAD[%s]>> OSMAKE_FAIL:%s RET\n",
+				r.RemoteAddr, fName)
 		}
 		return
 	}
@@ -77,25 +76,23 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	_, err = io.Copy(file, buffer)
 	if err != nil {
 		_, _ = fmt.Fprintln(w, err)
-		if *connLog {
-			fmt.Printf("FWRITE_FAIL:%s RET\n", fName)
+		if *connLog { // Log request
+			log.Printf("UPLOAD[%s]>> FWRITE_FAIL:%s RET\n",
+				r.RemoteAddr, fName)
 		}
 		return
 	}
 	_, _ = fmt.Fprintf(w, "http://%s%s", r.Host,
 		path.Join(*virPath, fName))
-	if *connLog {
-		fmt.Printf("SUCCESS:%s RET\n", fName)
+	if *connLog { // Log request
+		log.Printf("UPLOAD[%s]>> SUCCESS:%s RET\n",
+			r.RemoteAddr, fName)
 	}
 }
 
 /*ListDirectory display file list if true and secret valid*/
 func ListDirectory(h http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Log request
-		if *connLog {
-			log.Printf("ACCESS[%s]>> ", r.RemoteAddr)
-		}
 		if strings.HasSuffix(r.URL.RawPath, "/") ||
 			len(r.URL.RawPath) == 0 {
 			// Remove port section from addr
@@ -109,17 +106,17 @@ func ListDirectory(h http.Handler) http.HandlerFunc {
 				} else {
 					http.ServeFile(w, r, *errPage)
 				}
-				// Log request
-				if *connLog {
-					log.Print("DVIEW_FAIL RET\n")
+				if *connLog { // Log request
+					log.Printf("ACCESS[%s]>> DIRLS_FAIL RET\n",
+						r.RemoteAddr)
 				}
 				return
 			}
 		}
 		h.ServeHTTP(w, r)
-		// Log request
-		if *connLog {
-			log.Printf("SERVE:%s RET\n", r.URL.RawPath)
+		if *connLog { // Log request
+			log.Printf("ACCESS[%s]>> SERVE:%s RET\n",
+				r.RemoteAddr, r.URL.RawPath)
 		}
 	})
 }
