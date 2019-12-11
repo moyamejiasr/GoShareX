@@ -3,9 +3,11 @@ A simple Custom ShareX Uploader using only standard built-in Go packages.
 
 **PD: Although this tool can be compiled for Windows and Linux the client software(ShareX) is only available for Windows.**
 
-### Version 3
-[Get it here](https://github.com/Onelio/GoShareX/tree/V3.1)
-- Support has been improved for streaming and big files transfer
+### Version 4
+[Get it here](https://github.com/Onelio/GoShareX/tree/V4)
+- Bugfix
+- Added logs
+- Added custom error page
 
 # INDEX
 1. [Installation](#Installation)
@@ -27,7 +29,9 @@ GoShareX.exe
 - `output` Set output system directory for storage - will be created if not exist (Default "out")
 - `path` Set virtual path for previewing files (Default "/!/")
 - `secret` Shared secret between ShareX and server for auth - allow everything if none (Default "")
-- `iplist` Coma separated list of every dir-listing allowed address (Default "127.0.0.1")
+- `whitelist` Coma separated list of every dir-listing allowed address (Default "127.0.0.1")
+- `error` Custom error 404 page
+- `log` Enable log (in 2> output)
 - `size` Max upload size in MB stored in memory - rest is saved to disk (Default 10)
 
 # ShareX Configuration
