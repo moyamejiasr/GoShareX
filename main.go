@@ -25,22 +25,31 @@ var (
 	size      = flag.Int64("size", 10, "Max upload size in MB stored in memory(rest is saved to disk)")
 )
 
-/*GenerateName return a filename base64 encoded from time*/
-func GenerateName(str string) string {
+/*generateName return a filename base64 encoded from time*/
+func generateName(str string) string {
 	n := time.Now().UnixNano()
 	name := (*[8]byte)(unsafe.Pointer(&n))
 	return base64.RawURLEncoding.EncodeToString(name[:]) +
 		path.Ext(str)
 }
 
-/*UploadFile uploads file to output if secret valid*/
-func UploadFile(w http.ResponseWriter, r *http.Request) {
+/*serveError shows 404 error or custom one if set*/
+func serveError(w http.ResponseWriter, r *http.Request) {
+	if len(*errPage) == 0 {
+		http.NotFound(w, r)
+	} else {
+		http.ServeFile(w, r, *errPage)
+	}
+}
+
+/*uploadFile uploads file to output if secret valid*/
+func uploadFile(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(*size << 20)
 
 	// Check secret key - hide if not match
 	value := r.FormValue("secret")
 	if err != nil || *secret != value {
-		http.NotFound(w, r)
+		serveError(w, r)
 		if *connLog { // Log request
 			log.Printf("UPLOAD[%s]>> SECRET_FAIL:%s RET\n",
 				r.RemoteAddr, value)
@@ -60,7 +69,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 	defer buffer.Close()
 	// Create local file
-	fName := GenerateName(handler.Filename)
+	fName := generateName(handler.Filename)
 	file, err := os.Create(path.Join(*output, fName))
 	if err != nil {
 		_, _ = fmt.Fprintln(w, err)
@@ -90,8 +99,8 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*ListDirectory display file list if true and secret valid*/
-func ListDirectory(h http.Handler) http.HandlerFunc {
+/*listDirectory display file list if true and secret valid*/
+func listDirectory(h http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.RawPath, "/") ||
 			len(r.URL.RawPath) == 0 {
@@ -101,11 +110,7 @@ func ListDirectory(h http.Handler) http.HandlerFunc {
 				address = address[:i]
 			}
 			if !strings.Contains(*whitelist, address) {
-				if len(*errPage) == 0 {
-					http.NotFound(w, r)
-				} else {
-					http.ServeFile(w, r, *errPage)
-				}
+				serveError(w, r)
 				if *connLog { // Log request
 					log.Printf("ACCESS[%s]>> DIRLS_FAIL RET\n",
 						r.RemoteAddr)
@@ -127,9 +132,9 @@ func main() {
 	_ = os.MkdirAll(*output, os.ModePerm)
 
 	// Static Handler
-	http.HandleFunc("/upload", UploadFile)
+	http.HandleFunc("/upload", uploadFile)
 	// FServer Handler
-	fServer := ListDirectory(http.FileServer(http.Dir(*output)))
+	fServer := listDirectory(http.FileServer(http.Dir(*output)))
 	http.Handle(*virPath, http.StripPrefix(*virPath, fServer))
 
 	fmt.Print("Listening on ", *domain, " address...")
